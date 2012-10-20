@@ -1,6 +1,7 @@
 Changes
 lib/Acme/Lvalue.pm
 MANIFEST
+README
 Makefile.PL
 t/00-load.t
 t/tee.t
