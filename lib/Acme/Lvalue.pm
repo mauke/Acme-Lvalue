@@ -3,7 +3,7 @@ package Acme::Lvalue;
 use warnings;
 use strict;
 
-use 5.014_002;
+use v5.14.2;
 
 *VERSION = \'0.02';
 
@@ -24,7 +24,6 @@ use 5.014_002;
 		my ($self, $val) = @_;
 		my $ref = $self->[0];
 		$$ref = $self->[2]->($val, $$ref);
-		undef
 	}
 
 	sub UNTIE {}
@@ -32,13 +31,7 @@ use 5.014_002;
 }
 
 use Math::Trig;
-
-sub _croak {
-	require Carp;
-	no warnings qw(redefine);
-	*_croak = \&Carp::croak;
-	goto &Carp::croak;
-}
+use Carp qw(croak);
 
 sub _export {
 	my ($where, $what, $how, $woh) = @_;
@@ -50,61 +43,53 @@ sub _export {
 	*{$where . '::' . $what} = $fun;
 }
 
-{
-	my %builtins = map +($_->[0] => [eval "sub {scalar $_->[0] \$_[0]}", $_->[1]]),
-		[chr       => sub { ord $_[0] }],
-		[cos       => sub { acos $_[0] }],
-		[defined   =>
-			sub {
-				$_[0]
-					? defined $_[1]
-						? $_[1]
-						: 1
-					: undef
-			},
-		],
-		[exp       => sub { log $_[0] }],
-		[hex       => sub { sprintf '%x', $_[0] }],
-		[length    =>
-			sub {
-				my ($n, $x) = @_;
-				my $l = length $x;
-				$n <= $l
-					? substr $x, 0, $n
-					: $x . "\0" x ($n - $l)
-			}
-		],
-		[log       => sub { exp $_[0] }],
-		[oct       => sub { sprintf '%o', $_[0] }],
-		[ord       => sub { chr $_[0] }],
-		[quotemeta =>
-			sub {
-				my $x = shift;
-				$x =~ s/\\(.)/$1/sg;
-				$x
-			},
-		],
-		[reverse   => sub { scalar reverse $_[0] }],
-		[sin       => sub { asin $_[0] }],
-		[sqrt      => sub { my $x = shift; $x * $x }],
-	;
+our %builtins = map +($_->[0] => [eval "sub {scalar $_->[0] \$_[0]}", $_->[1]]),
+	[chr       => sub { ord $_[0] }],
+	[cos       => sub { acos $_[0] }],
+	[defined   =>
+		sub {
+			$_[0]
+				? defined $_[1]
+					? $_[1]
+					: 1
+				: undef
+		}
+	],
+	[exp       => sub { log $_[0] }],
+	[hex       => sub { sprintf '%x', $_[0] }],
+	[length    =>
+		sub {
+			my ($n, $x) = @_;
+			my $l = length $x;
+			$n <= $l
+				? substr $x, 0, $n
+				: $x . "\0" x ($n - $l)
+		}
+	],
+	[log       => sub { exp $_[0] }],
+	[oct       => sub { sprintf '%o', $_[0] }],
+	[ord       => sub { chr $_[0] }],
+	[quotemeta => sub { $_[0] =~ s/\\(.)/$1/sgr }],
+	[reverse   => sub { scalar reverse $_[0] }],
+	[sin       => sub { asin $_[0] }],
+	[sqrt      => sub { my $x = shift; $x * $x }],
+;
 
-	sub import {
-		my $class = shift;
-		my $caller = caller;
+sub import {
+	my $class = shift;
+	my $caller = caller;
 
-		for my $item (@_) {
-			if (ref $item) {
-				_export $caller, @$item;
-			} elsif ($item eq ':builtins') {
-				for my $f (keys %builtins) {
-					_export $caller, $f, @{$builtins{$f}};
-				}
-			} elsif ($builtins{$item}) {
-				_export $caller, $item, @{$builtins{$item}};
-			} else {
-				_croak qq{"$item" is not exported by the $class module};
+	for my $item (@_) {
+		if (ref $item) {
+			_export $caller, @$item;
+		} elsif ($item eq ':builtins') {
+			for my $f (keys %builtins) {
+				_export $caller, $f, @{$builtins{$f}};
 			}
+		} elsif ($builtins{$item}) {
+			_export $caller, $item, @{$builtins{$item}};
+		} else {
+			croak qq{"$item" is not exported by the $class module};
 		}
 	}
 }
@@ -128,17 +113,18 @@ Acme::Lvalue - Generalized lvalue subs
 
 =head1 DESCRIPTION
 
-=head1 BUGS
-
 =head1 AUTHOR
 
 Lukas Mai, C<< <l.mai  at web.de> >>
 
 =head1 COPYRIGHT & LICENSE
 
-Copyright 2011 Lukas Mai, all rights reserved.
+Copyright 2011-2012 Lukas Mai.
 
-This program is free software; you can redistribute it and/or
-modify it under the same terms as Perl itself.
+This program is free software; you can redistribute it and/or modify it
+under the terms of either: the GNU General Public License as published
+by the Free Software Foundation; or the Artistic License.
+
+See http://dev.perl.org/licenses/ for more information.
 
 =cut

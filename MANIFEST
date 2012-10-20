@@ -1,0 +1,7 @@
+Changes
+lib/Acme/Lvalue.pm
+MANIFEST
+Makefile.PL
+t/00-load.t
+t/tee.t
+t/wtf.t
