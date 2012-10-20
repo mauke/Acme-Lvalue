@@ -99,23 +99,79 @@ __END__
 
 =head1 NAME
 
-Acme::Lvalue - Generalized lvalue subs
+Acme::Lvalue - Generalized lvalue subroutines
 
 =head1 SYNOPSIS
 
-    use Acme::Lvalue qw(:builtins)
-    
-    my $x;
-    sqrt($x) = 3;  # $x == 9
-    hex($x) = 212;  # $x eq "d4"
-    $x = 2;
-    length(sqrt($x)) = 5;  # $x == 1.999396
+  use Acme::Lvalue qw(:builtins)
+  
+  my $x;
+  sqrt($x) = 3;  # $x == 9
+  hex($x) = 212;  # $x eq "d4"
+  $x = 2;
+  length(sqrt($x)) = 5;  # $x == 1.999396
 
 =head1 DESCRIPTION
 
+This module makes a number of perl builtins return lvalues, letting you assign
+to them. This lets you do things like:
+
+  reverse(hex $x) = '9558295373';
+  # $x eq 'deadbeef'
+  #   because hex 'deadbeef' == 3735928559
+  #   and reverse '3735928559' eq '9558295373'
+
+When you load this module, you can pass a list of 0 or more import
+specifications. If you don't pass any, nothing is exported. Every import
+specification must be one of the following:
+
+=over
+
+=item * The string C<:builtins>. 
+
+This overrides the following builtins:
+
+L<C<chr>|perlfunc/chr>,
+L<C<cos>|perlfunc/cos>,
+L<C<defined>|perlfunc/defined>,
+L<C<exp>|perlfunc/exp>,
+L<C<hex>|perlfunc/hex>,
+L<C<length>|perlfunc/length>,
+L<C<log>|perlfunc/log>,
+L<C<oct>|perlfunc/oct>,
+L<C<ord>|perlfunc/ord>,
+L<C<quotemeta>|perlfunc/quotemeta>,
+L<C<reverse>|perlfunc/reverse>,
+L<C<sin>|perlfunc/sin>,
+L<C<sqrt>|perlfunc/sqrt>.
+
+=item * Any of the builtins listed above.
+
+This lets you pick and choose which builtins to override.
+
+=item * An array reference of the form [I<NAME>, I<CODEREF_1>, I<CODEREF_2>].
+
+This lets you create customized invertible lvalue functions. I<NAME> is the
+name of the function that should be generated, I<CODEREF_1> is the
+implementation that should be called by the function, and I<CODEREF_2> is the
+inverse operation that should be called when the result is assigned to.
+
+That is, after C<use Acme::Lvalue ['foo', $REF_1, $REF_2]>, using C<foo($x)> as
+normal is equivalent to C<< $REF_1->($x) >> while using C<foo($x) = $y> is
+equivalent to C<< $x = $REF_2->($y) >>.
+
+Example:
+
+  use Acme::Lvalue ['succ', sub { $_[0] + 1 }, sub { $_[0] - 1 }];
+
+  my $x = succ 4;  # $x == 5
+  succ($x) = 43;   # $x == 42
+
+=back
+
 =head1 AUTHOR
 
-Lukas Mai, C<< <l.mai  at web.de> >>
+Lukas Mai, C<< <l.mai at web.de> >>
 
 =head1 COPYRIGHT & LICENSE
 
