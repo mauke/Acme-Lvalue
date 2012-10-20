@@ -3,7 +3,7 @@ package Acme::Lvalue;
 use warnings;
 use strict;
 
-use v5.14.2;
+use v5.16.0;  # earliest release with #51408 fixed
 
 *VERSION = \'0.02';
 

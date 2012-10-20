@@ -21,7 +21,7 @@ WriteMakefile(
         'Carp' => 0,
         'Math::Trig' => 0,
     },
-    MIN_PERL_VERSION => '5.14.2',
+    MIN_PERL_VERSION => '5.16.0',
     META_MERGE => {
         'meta-spec' => { version => 2 },
         resources => {
