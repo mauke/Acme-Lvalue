@@ -2,7 +2,7 @@
 use warnings FATAL => 'all';
 use strict;
 
-use Test::More tests => 11;
+use Test::More tests => 10;
 
 use Acme::Lvalue qw(:builtins), [succ => sub { $_[0] + 1 }, sub { $_[0] - 1 }];
 
@@ -23,7 +23,6 @@ is $x, "trui\0\0\0\0\0\0";
 is succ(3), 4;
 succ($x) = 43;
 is $x, 42;
-ok !eval { succ(0) = 1; 1 };
 
 my $r = \sqrt($x);
 $$r = 3;

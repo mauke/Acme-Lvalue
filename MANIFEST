@@ -4,5 +4,6 @@ MANIFEST
 README
 Makefile.PL
 t/00-load.t
+t/readonly.t
 t/tee.t
 t/wtf.t

@@ -14,6 +14,7 @@ WriteMakefile(
     PL_FILES            => {},
     BUILD_REQUIRES => {
         'Test::More' => 0,
+        'Config' => 0,
     },
     PREREQ_PM => {
         'warnings' => 0,
