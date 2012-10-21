@@ -5,7 +5,7 @@ use strict;
 
 use v5.16.0;  # earliest release with #51408 fixed
 
-*VERSION = \'0.02';
+*VERSION = \'0.03';
 
 {
 	package Acme::Lvalue::Proxy;
