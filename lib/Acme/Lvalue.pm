@@ -1,11 +1,7 @@
-package Acme::Lvalue;
-
-use warnings;
-use strict;
+package Acme::Lvalue 0.03;
 
 use v5.16.0;  # earliest release with #51408 fixed
-
-*VERSION = \'0.03';
+use warnings;
 
 {
 	package Acme::Lvalue::Proxy;
